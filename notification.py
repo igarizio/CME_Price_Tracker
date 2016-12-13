@@ -1,34 +1,38 @@
 # -*- coding: utf-8 -*-
 import smtplib
+import json
 from email.mime.text import MIMEText
 from urllib import request
+from configparser import ConfigParser
 
 
 class Notification:
-    def __init__(self, p_actual, p_target, p_target_nuevo, sobre_precio):
-        self.p_actual = p_actual
-        self.p_target = p_target
-        self.p_target_nuevo = p_target_nuevo
-        self.sobre_precio = sobre_precio
+    def __init__(self, sender_pass):
+        self.parser = ConfigParser()
+        self.parser.read('config.ini')
 
-    def send_notifications(self):
-        not_txt1 = self.send_ifttt()
-        not_txt2 = self.send_email()
-        return not_txt1 + "\n" + "-"*50 + "\n" + not_txt2
+        self.__sender_mail = self.parser.get('email', 'sender')
+        self.__sender_pass = sender_pass
 
-    def send_email(self):
-        mail_from = "notificacioncme@gmail.com"
-        mail_from_pass = "password del correo emisor" #Poner password real
-        mail_to = ["correo_receptor_2@gmail.com", "correo_receptor_2@gmail.com"] #Poner correo reales
- 
+    def send_notifications(self, actual_p, target_p, target_p_new, sobre_precio):
+        notif_email = self.send_email(actual_p, target_p, target_p_new, sobre_precio)
+        notif_ifttt = self.send_ifttt()
+
+        return notif_email + "\n" + "-"*50 + "\n" + notif_ifttt
+
+    def send_email(self, actual_p, target_p, target_p_new, sobre_precio):
+        mail_from = self.__sender_mail
+        mail_from_pass = self.__sender_pass
+        mail_to = json.loads(self.parser.get('email', 'receivers'))
+
         try:
             server = smtplib.SMTP('smtp.gmail.com', 587)
             server.starttls()
             server.login(mail_from, mail_from_pass)
 
-            pos = "sobre" if self.sobre_precio else "debajo"
+            pos = "sobre" if sobre_precio else "debajo"
             msg = MIMEText("""Hola\nEl precio actual del contrato futuro es de {}, valor por {} de tu precio target (que era de {}).\nPara evitar correos molestos, el nuevo target va a ser: {}"""
-                           .format(self.p_actual, pos, self.p_target, self.p_target_nuevo))
+                           .format(actual_p, pos, target_p, target_p_new))
 
             msg['Subject'] = "Precio por {} de tu target".format(pos)
             msg['From'] = mail_from
@@ -42,12 +46,12 @@ class Notification:
             return "---> Error al enviar correo."
 
     def send_ifttt(self):
-        url_get = "https://maker.ifttt.com/trigger/price_alert/with/key/{poner key real de IFTTT}" #Pner key de ususario real de IFTTT
+        url_get = self.parser.get('urls', 'ifttt') + self.parser.get('urls', 'ifttt_key')
         req = request.Request(url_get)
+
         try:
             with request.urlopen(req) as response:
                 html = response.read().decode("utf-8", "ignore")
                 return "Notificación enviada a IFTTT: \n" + html
         except Exception:
-            print("error ifttt")
-            return "---> Error al enviar notificación."
+            return "---> Error al enviar notificación IFTTT."
