@@ -3,7 +3,6 @@ from scraper import Scraper
 from notification import Notification
 from logger import Logger
 from time import sleep
-from configparser import ConfigParser
 
 
 class Traker:

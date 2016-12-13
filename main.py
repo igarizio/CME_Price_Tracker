@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from tracker import Traker
-from notification import Notification
 from configparser import ConfigParser
 import argparse
 import getpass
