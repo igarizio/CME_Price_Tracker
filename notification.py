@@ -46,12 +46,14 @@ class Notification:
             return "---> Error al enviar correo."
 
     def send_ifttt(self):
-        url_get = self.parser.get('urls', 'ifttt') + self.parser.get('urls', 'ifttt_key')
+        url_base = str(self.parser.get('urls', 'ifttt'))
+        url_get = url_base.format(self.parser.get('urls', 'ifttt_name'), self.parser.get('urls', 'ifttt_key'))
         req = request.Request(url_get)
 
         try:
             with request.urlopen(req) as response:
                 html = response.read().decode("utf-8", "ignore")
                 return "Notificación enviada a IFTTT: \n" + html
+
         except Exception:
             return "---> Error al enviar notificación IFTTT."

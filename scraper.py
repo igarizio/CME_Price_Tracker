@@ -17,5 +17,6 @@ class Scraper:
         with request.urlopen(req) as response:
             html = response.read().decode("utf-8", "ignore")
             dict_res = json.loads(html)
-            p_actual = float(dict_res['quotes'][0]['last'])
-        return p_actual
+            actual_p = float(dict_res['quotes'][0]['last'])
+            print(actual_p)
+        return actual_p
