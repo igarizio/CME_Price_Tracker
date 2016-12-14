@@ -31,7 +31,9 @@ class Notification:
             server.login(mail_from, mail_from_pass)
 
             pos = "sobre" if sobre_precio else "debajo"
-            msg = MIMEText("""Hola\nEl precio actual del contrato futuro es de {}, valor por {} de tu precio target (que era de {}).\nPara evitar correos molestos, el nuevo target va a ser: {}"""
+            msg = MIMEText("""Hola\nEl precio actual del contrato futuro es de {},
+							valor por {} de tu precio target (que era de {}).\n
+							Para evitar correos molestos, el nuevo target va a ser: {}"""
                            .format(actual_p, pos, target_p, target_p_new))
 
             msg['Subject'] = "Precio por {} de tu target".format(pos)
